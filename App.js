@@ -7,6 +7,7 @@ import {
 } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { useTheme } from "@react-navigation/native";
+import { Provider as PaperProvider } from "react-native-paper";
 
 function HomeScreen({ navigation }) {
   return (
@@ -66,10 +67,12 @@ const Stack = createNativeStackNavigator();
 function App() {
   return (
     <NavigationContainer theme={DarkTheme}>
-      <Stack.Navigator initialRouteName="Home">
-        <Stack.Screen name="Home" component={HomeScreen} />
-        <Stack.Screen name="Details" component={DetailsScreen} />
-      </Stack.Navigator>
+      <PaperProvider>
+        <Stack.Navigator initialRouteName="Home">
+          <Stack.Screen name="Home" component={HomeScreen} />
+          <Stack.Screen name="Details" component={DetailsScreen} />
+        </Stack.Navigator>
+      </PaperProvider>
     </NavigationContainer>
   );
 }
