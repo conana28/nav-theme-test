@@ -6,7 +6,6 @@ import { useTheme, Button } from "react-native-paper";
 
 const DetailScreen = ({ route, navigation }) => {
   const { itemId, otherParam } = route.params; // Get the param
-
   const { colors } = useTheme();
   // console.log(colors);
 
