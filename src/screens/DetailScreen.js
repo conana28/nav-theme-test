@@ -1,13 +1,19 @@
-import { View, Text } from "react-native";
+import { useTheme, Button, Text } from "react-native-paper";
+import { View } from "react-native";
 import React from "react";
 // import { useTheme } from "@react-navigation/native";
-import { useTheme, Button } from "react-native-paper";
 // import { Button } from "react-native-paper";
+import { PreferencesContext } from "../PreferencesContext";
 
 const DetailScreen = ({ route, navigation }) => {
+  console.log("Route: ", route);
+  console.log("Navigation: ", navigation);
   const { itemId, otherParam } = route.params; // Get the param
+
   const { colors } = useTheme();
-  // console.log(colors);
+
+  const { toggleTheme, isThemeDark } = React.useContext(PreferencesContext);
+  console.log("Is Dark theme: ", isThemeDark);
 
   return (
     <View
@@ -17,15 +23,20 @@ const DetailScreen = ({ route, navigation }) => {
         justifyContent: "center",
       }}
     >
-      <Text style={{ color: colors.primary, marginBottom: 16 }}>
+      <Text
+        variant="titleLarge"
+        style={{ marginBottom: 8 }}
+        onPress={() => console.log("Pressed")}
+      >
         Details Screen
       </Text>
-      <Text style={{ color: colors.secondary }}>
+      <Text variant="bodyLarge" style={{ color: colors.secondary }}>
         itemId: {JSON.stringify(itemId)}
       </Text>
       <Text style={{ color: colors.tertiary }}>
         otherParam: {JSON.stringify(otherParam)}
       </Text>
+
       <Button
         style={{ marginTop: 16, marginBottom: 16 }}
         buttonColor={colors.tertiary}
@@ -33,6 +44,7 @@ const DetailScreen = ({ route, navigation }) => {
         onPress={() =>
           navigation.push("Details", {
             itemId: Math.floor(Math.random() * 100),
+            title: "Details+1",
           })
         }
       >
