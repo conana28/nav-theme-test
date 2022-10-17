@@ -2,127 +2,203 @@ import {
   Text,
   TextInput,
   Searchbar,
-  List,
   Menu,
   Divider,
   Button,
-  Paragraph,
   Dialog,
   Portal,
-  MD3Colors,
+  useTheme,
+  HelperText,
+  Card,
+  Title,
+  Paragraph,
+  Surface,
 } from "react-native-paper";
 import * as React from "react";
-import { View, StyleSheet } from "react-native";
+import { View, StyleSheet, TouchableOpacity } from "react-native";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { format } from "date-fns";
 
-import { testBottles } from "../util/https";
+import { searchBottles, consumeBottle, testBottles } from "../util/https";
+import { FlatList } from "react-native";
+import CellarMoveDialog from "./Dialogs/CellarMoveDialog";
 
 function CellarScreen() {
-  const [text, setText] = React.useState("");
-  const [searchQuery, setSearchQuery] = React.useState("");
+  // const [text, setText] = React.useState("");
+  const [searchQuery, setSearchQuery] = React.useState(""); // Search bar contents
   const [searchLoading, setSearchLoading] = React.useState(false);
-  const [searchResults, setSearchResults] = React.useState([]);
+  const [searchResults, setSearchResults] = React.useState([]); // Search results
   const [selectedId, setSelectedId] = React.useState(""); // id of bottle selected
-  const [selectedWineText, setSelectedWineText] = React.useState(""); // id of bottle selected
-
-  const onChangeSearch = (query) => setSearchQuery(query);
-
-  const searchCellar = async () => {
-    console.log("searchCellar");
-    const b = await testBottles();
-    // console.log(b.data.bottles1x);
-    setSearchResults(b.data.bottles1x);
-  };
-
-  const itemPressed = (event, id, wText) => {
-    // console.log(Object.keys(event));
-    // console.log("Item Pressed", id);
-    // console.log("Item Pressed", Math.ceil(event.nativeEvent.pageY));
-    setSelectedId(id);
-    setSelectedWineText(wText);
-    setMenuLocation({ x: 460, y: Math.ceil(event.nativeEvent.pageY) });
-    openMenu();
-  };
+  const [selectedDate, setSelectedDate] = React.useState(new Date()); // date selected
+  const [selectedWineText, setSelectedWineText] = React.useState(""); // text of bottle selected
+  const [selectedLocation, setSelectedLocation] = React.useState({
+    rack: "RACK",
+    shelf: "SHELF",
+  }); // text of bottle selected
+  // const { colors } = useTheme();
 
   // Action Menu
   const [visible, setVisible] = React.useState(false);
   const [menuLocation, setMenuLocation] = React.useState({ x: 100, y: 100 });
   const openMenu = () => setVisible(true);
   const closeMenu = () => setVisible(false);
+  // Menu item pressed
+  const itemPressed = (event, id, wText) => {
+    setSelectedId(id);
+    setSelectedWineText(wText);
+    setMenuLocation({ x: 380, y: Math.ceil(event.nativeEvent.pageY) });
+    openMenu();
+  };
+
+  // Move / Edit
+  const [showMoveDialog, setShowMoveDialog] = React.useState(false);
+  const hideCMDialog = () => setShowMoveDialog(false);
+  const movePressed = () => {
+    closeMenu();
+    setShowMoveDialog(true); // Go to move dialog
+  };
+
+  //Consume
   const consumePressed = () => {
     console.log("Consume", selectedId);
     closeMenu();
     setShowConsumeDialog(true); // Go to consume dialog
   };
+
   // Consume Dialog
-  const [date, setDate] = React.useState(new Date()); // Date Format
   const [consumeDate, setConsumeDate] = React.useState(
-    // Date in string formar for text input
-    format(new Date(), "dd/MM/yy")
+    format(new Date(), "dd/MM/yy") // Date in string format for text input
   );
   const [showConsumeDialog, setShowConsumeDialog] = React.useState(false);
   const [show, setShow] = React.useState(false);
   const hideDialog = () => setShowConsumeDialog(false);
+
+  // Process Date select from DatePicker
   const onChange = (event, selectedDate) => {
     console.log("E: ", event.type);
     setShow(false);
-
     if (event.type === "dismissed") {
       return;
     }
     if (event.type === "set") {
       const currentDate = selectedDate;
-      setDate(currentDate);
+      setSelectedDate(currentDate);
       setConsumeDate(format(currentDate, "dd/MM/yy"));
       return;
     }
-    console.log("Should never ever get here");
   };
+
+  // Process consume Button
+  const consumeDialog = async () => {
+    await consumeBottle(selectedId, format(selectedDate, "yyyy-MM-yy"));
+    hideDialog();
+    setSearchQuery("");
+    setSearchResults([]);
+  };
+
+  /* Search Bar */
+  const [showHelpText, setShowHelpText] = React.useState(true);
+  const [showHelpError, setShowHelpError] = React.useState(false);
+  const onChangeSearch = (query) => {
+    setSearchQuery(query);
+    setShowHelpText(true);
+    setShowHelpError(false);
+    setSearchResults([]);
+    const commaPosition = query.indexOf(",") + 1;
+    if (commaPosition > 0) {
+      // , entered
+      setShowHelpText(false);
+      const vintage = query.slice(commaPosition);
+      if (vintage.length > 0) {
+        setShowHelpError(isNaN(Number(vintage)));
+      }
+    }
+  };
+  // Process search string
+  const searchCellar = async () => {
+    console.log("searchCellar: ", searchQuery);
+    if (searchQuery.length === 0) {
+      return;
+    }
+    const comma = searchQuery.indexOf(",");
+    let searchWine = "";
+    let searchVintage = "";
+    if (comma === -1) {
+      searchWine = searchQuery;
+    } else {
+      searchWine = searchQuery.substring(0, comma);
+      searchVintage = searchQuery.substring(comma + 1);
+    }
+    const searchObj = { wineText: searchWine, vintage: searchVintage };
+    setSearchLoading((prev) => true);
+    const b = await searchBottles(searchObj);
+    setSearchResults(b);
+    setSearchLoading((prev) => false);
+  };
+
   return (
     <>
-      <View style={style.container}>
-        <Text variant="titleLarge">Cellar Screen</Text>
-        <TextInput
-          label="Search"
-          value={text}
-          onChangeText={(text) => setText(text)}
-        />
-
+      <View style={styles.container}>
         <Searchbar
-          placeholder="Search"
+          placeholder="Wine search"
           onChangeText={onChangeSearch}
           value={searchQuery}
-          onIconPress={() => {
-            setSearchLoading(true);
-            searchCellar();
-            setSearchLoading(false);
-          }}
+          onIconPress={searchCellar}
           loading={searchLoading}
+          style={{ width: "100%" }}
         />
+
+        {showHelpError && (
+          <HelperText type="error" visible={showHelpError}>
+            invalid vinatge
+          </HelperText>
+        )}
+
+        {showHelpText && (
+          <HelperText type="info" visible={showHelpText}>
+            Use , to include vintage
+          </HelperText>
+        )}
+
+        {/* <Text>Search query = {searchQuery}</Text> */}
 
         {searchResults.length > 0 && (
           <>
-            <List.Section>
-              {/* <List.Subheader>Search Results</List.Subheader> */}
-              {searchResults.map((bb) => (
-                <List.Item
-                  key={bb._id}
-                  title={bb.wineText + " - " + bb.vintage}
-                  titleNumberOfLines={2}
-                  titleStyle={{ fontSize: 20 }}
-                  onPress={(e) => itemPressed(e, bb._id, bb.wineText)}
-                  color={MD3Colors.tertiary70}
-                  //   left={() => (
-                  //     <List.Icon
-                  //       color={MD3Colors.tertiary70}
-                  //       style={{ marginLeft: -20, marginRight: -10 }}
-                  //       icon="dots-vertical"
-                  //     />
-                  //   )}
-                />
-              ))}
-            </List.Section>
+            <FlatList
+              data={searchResults}
+              renderItem={({ item }) => (
+                <TouchableOpacity
+                  onPress={(e) => {
+                    itemPressed(
+                      e,
+                      item._id,
+                      item.vintage +
+                        " " +
+                        item.wineText +
+                        " : " +
+                        item.rack +
+                        (item.shelf ? "/" + item.shelf : "")
+                    );
+
+                    setSelectedLocation({ rack: item.rack, shelf: item.shelf });
+                  }}
+                >
+                  <Card elevation={2} style={styles.card} mode={"elevated"}>
+                    <Card.Content>
+                      <Title>
+                        {item.vintage === undefined
+                          ? item.wineText
+                          : item.wineText + "," + item.vintage}
+                        {" : "}
+                        {item.shelf === ""
+                          ? item.rack
+                          : item.rack + "/" + item.shelf}
+                      </Title>
+                    </Card.Content>
+                  </Card>
+                </TouchableOpacity>
+              )}
+            />
 
             <Menu
               visible={visible}
@@ -135,17 +211,13 @@ function CellarScreen() {
                 }}
                 title="Consume"
               />
-              <Menu.Item
-                onPress={() => {
-                  console.log("Move Pressed");
-                }}
-                title="Move"
-              />
+              <Menu.Item onPress={movePressed} title="Move" />
               <Divider />
               <Menu.Item onPress={() => {}} title="Edit" />
             </Menu>
             {/* </View> */}
             <Portal>
+              {/* Consume Dialog */}
               <Dialog visible={showConsumeDialog} onDismiss={hideDialog}>
                 <Dialog.Title>Consume a bottle</Dialog.Title>
                 <Dialog.Content>
@@ -167,7 +239,7 @@ function CellarScreen() {
                   {show && (
                     <DateTimePicker
                       testID="dateTimePicker"
-                      value={date}
+                      value={selectedDate}
                       mode={"date"}
                       is24Hour={true}
                       display="default" // Bug in Expo shows buttons as white if not default
@@ -181,9 +253,28 @@ function CellarScreen() {
                   <Button buttonColor="red" onPress={hideDialog}>
                     Cancel
                   </Button>
-                  <Button onPress={hideDialog}>Update</Button>
+                  <Button onPress={consumeDialog}>Consume</Button>
                 </Dialog.Actions>
               </Dialog>
+
+              {showMoveDialog && (
+                <CellarMoveDialog
+                  showMoveDialog={showMoveDialog}
+                  hideCMDialog={hideCMDialog}
+                  selectedWineText={selectedWineText}
+                  // selectedLocation={{ rack: "Garage", shelf: "3" }}
+                  selectedLocation={selectedLocation}
+                />
+              )}
+              {/* <Dialog visible={showMoveDialog} onDismiss={hideCMDialog}>
+                <Dialog.Title>Alert</Dialog.Title>
+                <Dialog.Content>
+                  <Paragraph>This is simple dialog</Paragraph>
+                </Dialog.Content>
+                <Dialog.Actions>
+                  <Button onPress={hideCMDialog}>Done</Button>
+                </Dialog.Actions>
+              </Dialog> */}
             </Portal>
           </>
         )}
@@ -192,14 +283,31 @@ function CellarScreen() {
   );
 }
 
+{
+  /* <Card.Title
+title={item.wineText + " - " + item.vintage}
+titleNumberOfLines={3}
+titleVariant="titleMedium"
+/> */
+}
+
 export default CellarScreen;
 
-const style = StyleSheet.create({
+const styles = StyleSheet.create({
   container: {
     flex: 1,
     // alignItems: "center",
     // justifyContent: "flex-start",
     marginTop: 16,
     padding: 16,
+  },
+  card: {
+    padding: 0,
+    marginBottom: 8,
+    roundness: 15,
+    // height: 80,
+    width: "100%",
+    // alignItems: "center",
+    // justifyContent: "center",
   },
 });

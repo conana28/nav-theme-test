@@ -22,3 +22,29 @@ export async function testBottles() {
 
   return bottles;
 }
+
+export async function searchBottles(searchObj) {
+  const bottles = await axios.post(
+    `https://courageous-tuna-shirt.cyclic.app/api/bottles/bottlesearch?page=1&limit=2000`,
+    searchObj
+  );
+  return bottles.data.data;
+}
+
+export async function consumeBottle(bid, cDate) {
+  let result = "";
+  await axios
+    .delete(`https://courageous-tuna-shirt.cyclic.app/api/bottles/${bid}`, {
+      data: { consume: cDate },
+    })
+    .then((response) => {
+      // console.log(response.data);
+      result = response.data;
+    })
+    .catch((error) => {
+      // console.log(error.response.data);
+      result = error.response.data;
+      setError("Consume error occured");
+    });
+  return result;
+}
