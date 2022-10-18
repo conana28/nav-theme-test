@@ -1,47 +1,37 @@
 import {
-  Text,
-  TextInput,
   Searchbar,
   Menu,
   Divider,
-  Button,
-  Dialog,
   Portal,
-  useTheme,
   HelperText,
   Card,
   Title,
-  Paragraph,
-  Surface,
 } from "react-native-paper";
 import * as React from "react";
 import { View, StyleSheet, TouchableOpacity } from "react-native";
-import DateTimePicker from "@react-native-community/datetimepicker";
-import { format } from "date-fns";
 
-import { searchBottles, consumeBottle, testBottles } from "../util/https";
+import { searchBottles } from "../util/https";
 import { FlatList } from "react-native";
+import CellarConsumeDialog from "./Dialogs/CellarConsumeDialog";
 import CellarMoveDialog from "./Dialogs/CellarMoveDialog";
 
 function CellarScreen() {
-  // const [text, setText] = React.useState("");
   const [searchQuery, setSearchQuery] = React.useState(""); // Search bar contents
   const [searchLoading, setSearchLoading] = React.useState(false);
   const [searchResults, setSearchResults] = React.useState([]); // Search results
   const [selectedId, setSelectedId] = React.useState(""); // id of bottle selected
-  const [selectedDate, setSelectedDate] = React.useState(new Date()); // date selected
   const [selectedWineText, setSelectedWineText] = React.useState(""); // text of bottle selected
   const [selectedLocation, setSelectedLocation] = React.useState({
     rack: "RACK",
     shelf: "SHELF",
   });
-  // const { colors } = useTheme();
 
   // Action Menu
   const [visible, setVisible] = React.useState(false);
   const [menuLocation, setMenuLocation] = React.useState({ x: 100, y: 100 });
   const openMenu = () => setVisible(true);
   const closeMenu = () => setVisible(false);
+
   // Menu item pressed
   const itemPressed = (event, id, wText) => {
     setSelectedId(id);
@@ -65,36 +55,8 @@ function CellarScreen() {
     setShowConsumeDialog(true); // Go to consume dialog
   };
 
-  // Consume Dialog
-  const [consumeDate, setConsumeDate] = React.useState(
-    format(new Date(), "dd/MM/yy") // Date in string format for text input
-  );
   const [showConsumeDialog, setShowConsumeDialog] = React.useState(false);
-  const [show, setShow] = React.useState(false);
   const hideDialog = () => setShowConsumeDialog(false);
-
-  // Process Date select from DatePicker
-  const onChange = (event, selectedDate) => {
-    console.log("E: ", event.type);
-    setShow(false);
-    if (event.type === "dismissed") {
-      return;
-    }
-    if (event.type === "set") {
-      const currentDate = selectedDate;
-      setSelectedDate(currentDate);
-      setConsumeDate(format(currentDate, "dd/MM/yy"));
-      return;
-    }
-  };
-
-  // Process consume Button
-  const consumeDialog = async () => {
-    await consumeBottle(selectedId, format(selectedDate, "yyyy-MM-yy"));
-    hideDialog();
-    setSearchQuery("");
-    setSearchResults([]);
-  };
 
   /* Search Bar */
   const [showHelpText, setShowHelpText] = React.useState(true);
@@ -160,8 +122,6 @@ function CellarScreen() {
           </HelperText>
         )}
 
-        {/* <Text>Search query = {searchQuery}</Text> */}
-
         {searchResults.length > 0 && (
           <>
             <FlatList
@@ -215,80 +175,34 @@ function CellarScreen() {
               <Divider />
               <Menu.Item onPress={() => {}} title="Edit" />
             </Menu>
-            {/* </View> */}
+
             <Portal>
               {/* Consume Dialog */}
-              <Dialog visible={showConsumeDialog} onDismiss={hideDialog}>
-                <Dialog.Title>Consume a bottle</Dialog.Title>
-                <Dialog.Content>
-                  <Text variant="titleMedium" style={{ marginBottom: 16 }}>
-                    {selectedWineText}
-                  </Text>
-                  {/* <Paragraph>This is simple dialog</Paragraph> */}
-                  <TextInput
-                    // label="ConsumeAA"
-                    value={consumeDate}
-                    onChangeText={(cDate) => setConsumeDate(cDate)}
-                    right={
-                      <TextInput.Icon
-                        icon="calendar"
-                        onPress={() => setShow("true")}
-                      />
-                    }
-                  />
-                  {show && (
-                    <DateTimePicker
-                      testID="dateTimePicker"
-                      value={selectedDate}
-                      mode={"date"}
-                      is24Hour={true}
-                      display="default" // Bug in Expo shows buttons as white if not default
-                      onChange={onChange}
-                      // positiveButtonLabel="OKKKK!"
-                      onError={() => console.log("Error")}
-                    />
-                  )}
-                </Dialog.Content>
-                <Dialog.Actions>
-                  <Button buttonColor="red" onPress={hideDialog}>
-                    Cancel
-                  </Button>
-                  <Button onPress={consumeDialog}>Consume</Button>
-                </Dialog.Actions>
-              </Dialog>
-
+              {showConsumeDialog && (
+                <CellarConsumeDialog
+                  showConsumeDialog={showConsumeDialog}
+                  hideDialog={hideDialog}
+                  selectedId={selectedId}
+                  selectedWineText={selectedWineText}
+                  setSearchQuery={setSearchQuery}
+                  setSearchResults={setSearchResults}
+                />
+              )}
+              {/* Move Dialog */}
               {showMoveDialog && (
                 <CellarMoveDialog
                   showMoveDialog={showMoveDialog}
                   hideCMDialog={hideCMDialog}
                   selectedWineText={selectedWineText}
-                  // selectedLocation={{ rack: "Garage", shelf: "3" }}
                   selectedLocation={selectedLocation}
                 />
               )}
-              {/* <Dialog visible={showMoveDialog} onDismiss={hideCMDialog}>
-                <Dialog.Title>Alert</Dialog.Title>
-                <Dialog.Content>
-                  <Paragraph>This is simple dialog</Paragraph>
-                </Dialog.Content>
-                <Dialog.Actions>
-                  <Button onPress={hideCMDialog}>Done</Button>
-                </Dialog.Actions>
-              </Dialog> */}
             </Portal>
           </>
         )}
       </View>
     </>
   );
-}
-
-{
-  /* <Card.Title
-title={item.wineText + " - " + item.vintage}
-titleNumberOfLines={3}
-titleVariant="titleMedium"
-/> */
 }
 
 export default CellarScreen;
