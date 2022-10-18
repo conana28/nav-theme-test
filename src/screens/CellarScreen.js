@@ -34,7 +34,7 @@ function CellarScreen() {
   const [selectedLocation, setSelectedLocation] = React.useState({
     rack: "RACK",
     shelf: "SHELF",
-  }); // text of bottle selected
+  });
   // const { colors } = useTheme();
 
   // Action Menu
