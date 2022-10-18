@@ -5,7 +5,7 @@ import React from "react";
 const CellarEditDialog = () => {
   return (
     <View>
-      <Text>CellarEditDialog!!</Text>
+      <Text>CellarEditDialog</Text>
     </View>
   );
 };
