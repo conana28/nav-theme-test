@@ -31,12 +31,60 @@ export async function searchBottles(searchObj) {
   return bottles.data.data;
 }
 
+export async function getBottle(bid) {
+  let result = "";
+  await axios
+    .get(`https://courageous-tuna-shirt.cyclic.app/api/bottles/${bid}`)
+    .then((response) => {
+      // console.log(response.data);
+      result = response.data;
+    })
+    .catch((error) => {
+      // console.log(error.response.data);
+      result = error.response.data;
+      setError("Consume error occured");
+    });
+  return result;
+}
+
 export async function consumeBottle(bid, cDate) {
   let result = "";
   await axios
     .delete(`https://courageous-tuna-shirt.cyclic.app/api/bottles/${bid}`, {
       data: { consume: cDate },
     })
+    .then((response) => {
+      // console.log(response.data);
+      result = response.data;
+    })
+    .catch((error) => {
+      // console.log(error.response.data);
+      result = error.response.data;
+      setError("Consume error occured");
+    });
+  return result;
+}
+
+export async function updateBottle(bid, btl) {
+  let result = "";
+  await axios
+    .patch(`https://courageous-tuna-shirt.cyclic.app/api/bottles/${bid}`, btl)
+    .then((response) => {
+      console.log(response.data);
+      result = response.data;
+    })
+    .catch((error) => {
+      // console.log(error.response.data);
+      result = error.response.data;
+      setError("Consume error occured");
+    });
+  return result;
+}
+
+export async function deleteBottle(bid) {
+  let result = "";
+  await axios
+    .delete(`https://courageous-tuna-shirt.cyclic.app/api/bottles/d/${bid}`)
     .then((response) => {
       // console.log(response.data);
       result = response.data;

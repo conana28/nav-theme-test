@@ -1,63 +1,96 @@
-import { View } from "react-native";
-import React from "react";
-// import { useTheme } from "@react-navigation/native";
-import { useTheme, Text, Button } from "react-native-paper";
-import { PreferencesContext } from "../PreferencesContext";
+import * as React from "react";
+import { View, StyleSheet, ImageBackground } from "react-native";
+import {
+  Avatar,
+  Text,
+  IconButton,
+  MD3Colors,
+  useTheme,
+} from "react-native-paper";
+import LandingPic from "../assets/bubbles2.jpg";
 
-const HomeScreen = ({ navigation }) => {
-  //   const { colors } = useTheme();
-  //   const theme = useTheme();
+const LeftContent = (props) => <Avatar.Icon {...props} icon="folder" />;
+const homeColor = "#ad9595c0";
 
+const MyComponent = ({ navigation }) => {
   const theme = useTheme();
-  const { toggleTheme, isThemeDark } = React.useContext(PreferencesContext);
-
   return (
     <>
-      <View
-        style={{
-          flex: 1,
-          alignItems: "center",
-          justifyContent: "center",
-        }}
-      >
-        <Text
-          variant="headlineLarge"
-          theme={{
-            colors: {
-              primary: theme?.colors.surface,
-            },
-          }}
-          style={{ marginBottom: 16 }}
+      <View style={styles.container}>
+        <ImageBackground
+          source={LandingPic}
+          resizeMode="cover"
+          style={styles.image}
         >
-          Home Screen
-        </Text>
+          <Text
+            variant="displayLarge"
+            style={{
+              marginTop: 124,
+              // fontSize: 36,
+              fontWeight: "700",
+              textAlign: "center",
+              color: theme.colors.primaryContainer,
+              // backgroundColor: theme.colors.onPrimary,
+            }}
+          >
+            Winetrak-M
+          </Text>
 
-        <Button
-          onPress={() => {
-            /* 1. Navigate to the Details route with params */
-            navigation.navigate("Details", {
-              itemId: 86,
-              title: "anything you want here",
-            });
-          }}
-          mode="contained"
-          dark
-        >
-          Go to Details
-        </Button>
-        <Button
-          onPress={() => {
-            navigation.navigate("Cellar");
-          }}
-          mode="contained-tonal"
-          theme={{ roundness: 2 }}
-          //   dark
-        >
-          Cellar
-        </Button>
+          <View
+            style={{
+              flex: 1,
+              marginTop: 16,
+              flexDirection: "row",
+              justifyContent: "space-around",
+              alignItems: "flex-end",
+            }}
+          >
+            <IconButton
+              mode="contained"
+              // icon={require("../assets/bottle-of-wine-alcohol-bottle-wine-svgrepo-com.svg")}
+              icon={"fruit-grapes"}
+              size={40}
+              iconColor={theme.colors.onTertiaryContainer}
+            />
+            <IconButton
+              mode="contained"
+              icon={"bottle-wine"}
+              size={40}
+              iconColor={theme.colors.onTertiaryContainer}
+              onPress={() => {
+                navigation.navigate("Cellar");
+              }}
+            />
+          </View>
+          <View
+            style={{
+              flex: 4,
+            }}
+          />
+        </ImageBackground>
       </View>
     </>
   );
 };
 
-export default HomeScreen;
+export default MyComponent;
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+  },
+  image: {
+    flex: 1,
+    justifyContent: "center",
+  },
+  text: {
+    // color: homeColor,
+    // color: theme.colors.tertiary,
+    fontSize: 36,
+    lineHeight: 84,
+    fontWeight: "bold",
+    textAlign: "center",
+    marginTop: 124,
+    // backgroundColor: "#000000c0",
+  },
+});

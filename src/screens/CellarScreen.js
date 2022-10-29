@@ -14,6 +14,7 @@ import { searchBottles } from "../util/https";
 import { FlatList } from "react-native";
 import CellarConsumeDialog from "./Dialogs/CellarConsumeDialog";
 import CellarMoveDialog from "./Dialogs/CellarMoveDialog";
+import CellarEditDialog from "./Dialogs/CellarEditDialog";
 
 function CellarScreen() {
   const [searchQuery, setSearchQuery] = React.useState(""); // Search bar contents
@@ -40,7 +41,7 @@ function CellarScreen() {
     openMenu();
   };
 
-  // Move / Edit
+  // Move
   const [showMoveDialog, setShowMoveDialog] = React.useState(false);
   const hideCMDialog = () => setShowMoveDialog(false);
   const movePressed = () => {
@@ -53,6 +54,14 @@ function CellarScreen() {
     console.log("Consume", selectedId);
     closeMenu();
     setShowConsumeDialog(true); // Go to consume dialog
+  };
+
+  // Edit / Delete
+  const [showEditDialog, setShowEditDialog] = React.useState(false);
+  const hideEditDialog = () => setShowEditDialog(false);
+  const editPressed = () => {
+    closeMenu();
+    setShowEditDialog(true); // Go to edit dialog
   };
 
   const [showConsumeDialog, setShowConsumeDialog] = React.useState(false);
@@ -173,7 +182,7 @@ function CellarScreen() {
               />
               <Menu.Item onPress={movePressed} title="Move" />
               <Divider />
-              <Menu.Item onPress={() => {}} title="Edit" />
+              <Menu.Item onPress={editPressed} title="Edit" />
             </Menu>
 
             <Portal>
@@ -195,6 +204,16 @@ function CellarScreen() {
                   hideCMDialog={hideCMDialog}
                   selectedWineText={selectedWineText}
                   selectedLocation={selectedLocation}
+                />
+              )}
+              {showEditDialog && (
+                <CellarEditDialog
+                  showEditDialog={showEditDialog}
+                  hideEditDialog={hideEditDialog}
+                  selectedId={selectedId}
+                  selectedWineText={selectedWineText}
+                  setSearchQuery={setSearchQuery}
+                  setSearchResults={setSearchResults}
                 />
               )}
             </Portal>
