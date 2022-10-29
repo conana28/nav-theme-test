@@ -11,6 +11,7 @@ import { Provider as PaperProvider } from "react-native-paper";
 import HomeScreen from "./screens/HomeScreen";
 import DetailScreen from "./screens/DetailScreen";
 import CellarScreen from "./screens/CellarScreen";
+import TestScreen from "./screens/TestScreen";
 import {
   useTheme,
   Appbar,
@@ -23,44 +24,32 @@ import { PreferencesContext } from "../src/PreferencesContext";
 function CustomNavigationBar({ navigation, back, route, options }) {
   const theme = useTheme();
   const { toggleTheme, isThemeDark } = React.useContext(PreferencesContext);
-  console.log("Back: ", back);
-  console.log(route);
-  console.log(options);
+  // console.log("Back: ", back);
+  // console.log(route);
+  // console.log(options);
 
   const [visible, setVisible] = React.useState(false);
   const openMenu = () => setVisible(true);
   const closeMenu = () => setVisible(false);
 
-  const [isSwitchOn, setIsSwitchOn] = React.useState(false);
-
   return (
-    <Appbar.Header>
+    <Appbar.Header
+      // elevated={true}
+      // mode={"small"}
+      style={{ backgroundColor: theme.colors.secondaryContainer, height: 32 }}
+    >
       {back ? <Appbar.BackAction onPress={navigation.goBack} /> : null}
       <Appbar.Content title={route.name} />
-      <TouchableRipple
-      // onPress={() => {
-      //   console.log("Switch pressed");
-      //   toggleTheme();
-      // }}
-      >
-        <Switch
-          value={isThemeDark}
-          onValueChange={() => {
-            toggleTheme();
-          }}
-        />
-        {/* <Switch
-          value={isSwitchOn}
-          onValueChange={() => {
-            setIsSwitchOn(!isSwitchOn);
-          }}
-        /> */}
-        {/* <Text>aaa</Text> */}
-        {/* <Switch
-          style={[{ backgroundColor: theme.colors.accent }]}
-          value={isThemeDark}
-        /> */}
-      </TouchableRipple>
+      {/* <TouchableRipple > */}
+      {/* Touchable ripple wasn't working on web ? with rc.8*/}
+      <Switch
+        value={isThemeDark}
+        onValueChange={() => {
+          console.log("Toggle");
+          toggleTheme();
+        }}
+      />
+      {/* </TouchableRipple> */}
       {!back ? (
         <Menu
           visible={visible}
@@ -75,15 +64,21 @@ function CustomNavigationBar({ navigation, back, route, options }) {
         >
           <Menu.Item
             onPress={() => {
-              console.log("Option 1 was pressed");
+              setVisible(false);
+              navigation.navigate("Test");
             }}
-            title="Option 1"
+            title="Test"
           />
           <Menu.Item
             onPress={() => {
-              console.log("Option 2 was pressed");
+              /* 1. Navigate to the Details route with params */
+              setVisible(false);
+              navigation.navigate("Details", {
+                itemId: 86,
+                title: "anything you want here",
+              });
             }}
-            title="Option 2"
+            title="Details"
           />
           <Menu.Item
             onPress={() => {
@@ -112,6 +107,7 @@ function App() {
         <Stack.Screen name="Home" component={HomeScreen} />
         <Stack.Screen name="Details" component={DetailScreen} />
         <Stack.Screen name="Cellar" component={CellarScreen} />
+        <Stack.Screen name="Test" component={TestScreen} />
       </Stack.Navigator>
     </>
   );
