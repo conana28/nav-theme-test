@@ -9,8 +9,10 @@ import { createNativeStackNavigator } from "@react-navigation/native-stack";
 // import { useTheme } from "@react-navigation/native";
 import { Provider as PaperProvider } from "react-native-paper";
 import HomeScreen from "./screens/HomeScreen";
-import DetailScreen from "./screens/DetailScreen";
 import CellarScreen from "./screens/CellarScreen";
+import WineScreen from "./screens/WineScreen";
+import DetailScreen from "./screens/DetailScreen";
+
 import TestScreen from "./screens/TestScreen";
 import {
   useTheme,
@@ -107,6 +109,7 @@ function App() {
         <Stack.Screen name="Home" component={HomeScreen} />
         <Stack.Screen name="Details" component={DetailScreen} />
         <Stack.Screen name="Cellar" component={CellarScreen} />
+        <Stack.Screen name="Wine" component={WineScreen} />
         <Stack.Screen name="Test" component={TestScreen} />
       </Stack.Navigator>
     </>

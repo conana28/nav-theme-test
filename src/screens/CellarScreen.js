@@ -111,7 +111,7 @@ function CellarScreen() {
     <>
       <View style={styles.container}>
         <Searchbar
-          placeholder="Wine search"
+          placeholder="Bottle search"
           onChangeText={onChangeSearch}
           value={searchQuery}
           onIconPress={searchCellar}

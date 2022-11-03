@@ -51,6 +51,9 @@ const MyComponent = ({ navigation }) => {
               icon={"fruit-grapes"}
               size={40}
               iconColor={theme.colors.onTertiaryContainer}
+              onPress={() => {
+                navigation.navigate("Wine");
+              }}
             />
             <IconButton
               mode="contained"

@@ -96,3 +96,45 @@ export async function deleteBottle(bid) {
     });
   return result;
 }
+
+// Wine
+
+export async function searchWines(searchObj) {
+  const wines = await axios.post(
+    `https://courageous-tuna-shirt.cyclic.app/api/wines/winesearch?page=1&limit=2000`,
+    searchObj
+  );
+  return wines.data.data;
+}
+
+export async function addBottleWine(btl) {
+  let result = "";
+  await axios
+    .post(`https://courageous-tuna-shirt.cyclic.app/api/bottles`, btl)
+    .then((response) => {
+      console.log(response.data);
+      result = response.data;
+    })
+    .catch((error) => {
+      // console.log(error.response.data);
+      result = error.response.data;
+      setError("Add bottle error occured");
+    });
+  return result;
+}
+
+// Notes
+
+export async function getNotesById(wId) {
+  let sorted = "";
+  await axios
+    .get(`https://courageous-tuna-shirt.cyclic.app/api/notes/${wId}/all`)
+    .then((response) => {
+      sorted = response.data.notes.sort((a, b) => a.vintage - b.vintage);
+    })
+    .catch((error) => {
+      console.log(error);
+      setError("Some error occured");
+    });
+  return sorted;
+}
